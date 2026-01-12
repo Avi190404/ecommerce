@@ -6,7 +6,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 const registerSchema = z.object({
-    name: z.string().min(3, "Name Must be at at leaste 3 character"),
+    name: z.string().min(3, "Name Must be at leaste 3 character"),
     email: z.string().email("Enter Proper Mail"),
     password: z
         .string()
