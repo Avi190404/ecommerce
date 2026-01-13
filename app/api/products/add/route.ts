@@ -2,17 +2,8 @@ import { connectToDB } from "@/lib/db";
 import esClient from "@/lib/elasticsearch";
 import { redisClient } from "@/lib/redis";
 import PRODUCT from "@/models/productModel";
+import { productSchema } from "@/types/productType";
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod"
-
-const productSchema = z.object({
-    name: z.string().min(5, "name Must be at least 5 character"),
-    description: z.string().min(10, "name Must be at least 10 character"),
-    price: z.number().positive("Price Must Be Positive Value"),
-    category: z.array(z.string().min(3,"Category Must at least 5 character")),
-    images: z.array(z.string().url()).min(1,"Image Must Have Atleast One Proper Url"),
-    stock: z.number().int().nonnegative("Stock Can not Be negative")
-})
 
 export async function POST(req:NextRequest) {
     try{
@@ -37,7 +28,6 @@ export async function POST(req:NextRequest) {
                 images: product.images,
             }
         })
-        await redisClient.del("all_products_list")
 
         return NextResponse.json({Msg: "New Product Created Successfully", newProduct}, {status: 201})
     }catch(err){

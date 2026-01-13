@@ -26,11 +26,6 @@ const productSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    view: {
-        type: Number,
-        default: 0,
-        index: true
-    },
     rating: {
         type: Number,
         default: 0,
@@ -39,6 +34,10 @@ const productSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    saleCount:{
+        type:Number,
+        default:0
+    }
 } , { timestamps: true })
 
 const PRODUCT = mongoose.models.Product || mongoose.model("Product", productSchema);

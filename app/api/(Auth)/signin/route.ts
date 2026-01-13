@@ -1,21 +1,9 @@
 import { connectToDB } from '@/lib/db'
 import USER from '@/models/userModel'
 import { NextRequest, NextResponse } from 'next/server'
-import { z } from 'zod'
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { stat } from 'fs';
-
-const signinSchema = z.object({
-    email: z.string().email("Enter Proper Mail"),
-    password: z
-        .string()
-        .min(6, "Passweord must be at at leaste 6 character Long")
-        .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter" })
-        .regex(/[a-z]/, { message: "Password must contain at least one lowercase letter" })
-        .regex(/[0-9]/, { message: "Password must contain at least one number" })
-        .regex(/[\W_]/, { message: "Password must contain at least one special character" }),
-})
+import { signinSchema } from '@/types/userType';
 
 export async function POST(req:NextRequest) {
     try{
