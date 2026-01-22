@@ -20,12 +20,13 @@ export async function POST(req:NextRequest) {
         await esClient.index({
             index: "products",
             id: newProduct._id.toString(),
-            document:{
+            body:{
                 name: product.name,
                 description: product.description,
                 price: product.price,
                 category: product.category,
                 images: product.images,
+                stock: product.stock
             }
         })
 
