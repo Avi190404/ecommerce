@@ -1,7 +1,7 @@
 import { connectToDB } from "@/lib/db";
 import esClient from "@/lib/elasticsearch";
 import PRODUCT from "@/models/productModel";
-import { faker } from "@faker-js/faker";
+import { sampleProducts } from "@/assets/products";
 import { NextResponse } from "next/server";
 
 export async function POST() {
@@ -9,38 +9,34 @@ export async function POST() {
         await connectToDB();
         let successCount = 0;
 
-        const CATEGORIES = ["Electronics", "Footwear", "Photography", "Computing", "Gaming"];
+        console.log(`🚀 Starting Seed: Syncing ${sampleProducts.length} verified products...`);
 
-        console.log("🚀 Starting Seed: Creating 100 unique products...");
-
-        for (let i = 0; i < 100; i++) {
-            const category = faker.helpers.arrayElement(CATEGORIES);
-            const name = `${faker.commerce.productAdjective()} ${faker.commerce.productMaterial()} ${faker.commerce.product()}`;
+        // Use the actual sampleProducts array instead of random Faker generation
+        for (const product of sampleProducts) {
             
-            const productType = name.split(" ").pop();
+            // Check if product already exists to avoid duplicates
+            const existingProduct = await PRODUCT.findOne({ name: product.name });
+            if (existingProduct) continue;
 
-            const images = Array.from({ length: 4 }).map((_, idx) => {
-                return `https://images.unsplash.com/photo-1?auto=format&fit=crop&w=800&q=80&${productType}&sig=${i}-${idx}`;
+            // 1. Create in MongoDB
+            // Note: MongoDB will generate the _id
+            const newProduct = await PRODUCT.create({
+                name: product.name,
+                description: `High-quality ${product.name} from our ${product.category} collection.`,
+                price: product.price,
+                category: [product.category],
+                images: product.images, // Using the array of images as requested
+                stock: product.stock,
+                rating: product.rating,
+                reviewNum: Math.floor(Math.random() * 500),
+                saleCount: Math.floor(Math.random() * 1000)
             });
 
-            const productData = {
-                name: name,
-                description: faker.commerce.productDescription(),
-                price: parseFloat(faker.commerce.price({ min: 50, max: 2500 })),
-                category: [category],
-                images: images,
-                stock: faker.number.int({ min: 0, max: 150 }),
-                rating: faker.number.float({ min: 1, max: 5, fractionDigits: 1 }),
-                reviewNum: faker.number.int({ min: 0, max: 1000 }),
-                saleCount: faker.number.int({ min: 0, max: 5000 })
-            };
-
-            const newProduct = await PRODUCT.create(productData);
-
+            // 2. Index in Elasticsearch
             await esClient.index({
                 index: "products",
                 id: newProduct._id.toString(),
-                body: {
+                body: { 
                     name: newProduct.name,
                     description: newProduct.description,
                     price: newProduct.price,
@@ -54,15 +50,12 @@ export async function POST() {
             });
 
             successCount++;
-            if (successCount % 10 === 0) {
-                console.log(`✅ Progress: ${successCount}/100 items synced.`);
-            }
         }
 
         return NextResponse.json({ 
-            Msg: "Deep Seed Successful", 
-            total: successCount,
-            status: "Synced with MongoDB & Elasticsearch" 
+            Msg: "Verified Seed Successful", 
+            totalSynced: successCount,
+            status: "MongoDB & Elasticsearch in sync with frontend samples" 
         }, { status: 201 });
 
     } catch (err) {
