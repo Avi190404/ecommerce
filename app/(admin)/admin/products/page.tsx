@@ -46,7 +46,7 @@ export default function products() {
         </div>
 
         <div className="flex items-center gap-3">
-          <SearchBar value={searchQuery} onChange={(e: any) => setSearchQuery(e.target.value)} />
+          <SearchBar className="max-w-sm" value={searchQuery} onChange={(e: any) => setSearchQuery(e.target.value)} />
           <Button asChild className="bg-black text-white hover:bg-slate-800 rounded-lg">
             <Link href="/admin/products/new">
               <Plus className="mr-2 h-4 w-4" /> Add Product
