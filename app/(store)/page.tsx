@@ -1,5 +1,4 @@
 import Image from "next/image";
-import ImageUplaod from "@/components/imageUpload";
 
 export default function Home() {
   return (
@@ -60,7 +59,6 @@ export default function Home() {
             Documentation
           </a>
 
-          <ImageUplaod/>
         </div>
       </main>
     </div>
