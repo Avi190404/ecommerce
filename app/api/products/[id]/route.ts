@@ -51,7 +51,7 @@ export async function PATCH(req:NextRequest, {params}: { params : {id: string}})
             index: "products",
             id: id,
             doc: result.data
-        }).catch(err => console.error("ES Update Failed:", err))
+        }).catch((err: any) => console.error("ES Update Failed:", err))
 
         await redisClient.del(`Product_${id}`);
         await redisClient.del("all_products_list");
@@ -76,7 +76,7 @@ export async function DELETE(req:NextRequest, {params}: { params : {id: string}}
         await esClient.delete({
             index: "products",
             id: id,
-        }).catch(err => console.error("ES Delete Failed:", err));
+        }).catch((err: any) => console.error("ES Delete Failed:", err));
 
         await redisClient.del(`Product_${id}`);
         await redisClient.del("all_products_list");

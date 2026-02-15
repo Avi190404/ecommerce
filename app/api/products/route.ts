@@ -70,7 +70,7 @@ export async function GET(req: NextRequest) {
             console.warn("Elasticsearch returned no hits object:", result);
             return NextResponse.json({ 
                 products: [], 
-                total: 0, 
+                total: 0,
                 currentPage: page, 
                 totalPages: 0 
             });
