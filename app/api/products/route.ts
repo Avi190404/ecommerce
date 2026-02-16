@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
 
         const query = searchParams.get("q") || "";
         const page = parseInt(searchParams.get("page") || "1");
-        const limit = parseInt(searchParams.get("limit") || "12");
+        const limit = parseInt(searchParams.get("limit") || "10");
         const category = searchParams.get("category") || "all";
         const sort = searchParams.get("sort") || "relevance";
         const minPrice = searchParams.get("min") || "0";

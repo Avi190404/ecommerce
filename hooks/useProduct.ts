@@ -3,7 +3,7 @@
 import { productService } from "@/services/ProductService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-export function useProduct(filters: {q?: string,page?:number, category?: string, sort?: string, min?: number, max?: number}){
+export function useProduct(filters: {q?: string,page?:number, category?: string, sort?: string, min?: number, max?: number, limit?: number}){
     return useQuery({
         queryKey: ["products", filters],
         queryFn: () => productService.getProducts(filters),
