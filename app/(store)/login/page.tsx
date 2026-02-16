@@ -1,81 +1,103 @@
 "use client";
 
-import { useState } from "react";
-import { Mail, Lock, User, ArrowRight, Github } from "lucide-react";
-import Link from "next/link";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { authSchema } from "@/types/authType";
+import { Eye, EyeClosed, Lock, Mail, User } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useSignIn, useSignUp } from "@/hooks/useAuth";
 
 export default function AuthPage() {
-  const [isLogin, setIsLogin] = useState(true);
-
+  const [ isLogin, setIsLogin ] = useState(true)
+  const [ showPassword, setShowPassword ] = useState(false)
+  const { 
+    register, 
+    handleSubmit, 
+    formState: { errors } 
+  } = useForm({
+    resolver: zodResolver(authSchema), 
+  });
+  const onSubmit = (formData: any) => {
+    const user = {...formData}
+    const { data, isLoading, error } = isLogin ? useSignIn(user) : useSignUp(user)
+    console.log(user)
+  }
   return (
-    <div className="flex min-h-[80vh] items-center justify-center px-4 py-12">
-      <div className="w-full max-w-[400px] space-y-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-extrabold tracking-tighter text-slate-900 uppercase">
-            {isLogin ? "Welcome Back" : "Create Account"}
-          </h1>
-          <p className="mt-2 text-sm text-slate-500">
-            {isLogin 
-              ? "Enter your details to access your account" 
-              : "Join our community and start shopping today"}
+    <div className="flex flex-col min-h-[80vh] items-center justify-center px-4 py-12">
+      <div className="w-full max-w-100 space-y-8">
+        <div className="flex flex-col items-center justify-center space-y-2">
+          <p className="font-bold text-slate-800 text-xl sm:text-2xl md:text-4xl">{isLogin ? "Welcome Back" : "Create Account"}</p>
+          <p className=" text-slate-600 text-center text-sm md:text-xl ">
+            {isLogin ? "Enter your details to access your account" : "Join our community and start shopping today"}
           </p>
         </div>
-
         <div className="rounded-3xl border border-slate-100 bg-white p-8 shadow-2xl">
-          <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+          <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
             {!isLogin && (
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="user">Username</Label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  <Input id="name" placeholder="Avi Patel" className="pl-10" required />
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2" />
+                  <Input placeholder="Username" className="pl-10" required {...register("username")} />
                 </div>
+                {errors.username && (
+                  <p className="text-xs text-red-500">{errors.username.message as string}</p>
+                )}
               </div>
             )}
-
             <div className="space-y-2">
               <Label htmlFor="email">Email Address</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <Input id="email" type="email" placeholder="name@example.com" className="pl-10" required />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2" />
+                <Input
+                  type="email"
+                  placeholder="test@example.com"
+                  className="pl-10"
+                  required
+                  {...register("email")}
+                />
               </div>
+              {errors.email && (
+                <p className="text-xs text-red-500">{errors.email.message as string}</p>
+              )}
             </div>
-
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
-                {isLogin && (
-                  <Link href="#" className="text-xs font-bold text-slate-400 hover:text-black transition-colors">
-                    Forgot?
-                  </Link>
-                )}
+                <Label htmlFor="Forget" className="text-slate-500">
+                  Forget
+                </Label>
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <Input id="password" type="password" placeholder="••••••••" className="pl-10" required />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2" />
+                <Input placeholder="Password" type={showPassword ? "text" : "password"} className="pl-10" required {...register("password")}/>
+                {showPassword ? (
+                  <EyeClosed className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer" onClick={() => setShowPassword(false)} />
+                ) : (
+                  <Eye className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer" onClick={() => setShowPassword(true)} />
+                )}
               </div>
+              {errors.password && (
+                <p className="text-xs text-red-500">{errors.password.message as string}</p>
+              )}
             </div>
-
-            <Button className="w-full bg-black h-12 font-bold hover:bg-slate-800 transition-all">
-              {isLogin ? "Sign In" : "Create Account"}
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            <div>
+              <Button type="submit" className="w-full">Sign In</Button>
+            </div>
           </form>
         </div>
-
-        <div className="text-center">
-          <button
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-sm font-bold text-slate-500 hover:text-black transition-colors"
-          >
-            {isLogin 
-              ? "Don't have an account? Sign Up" 
-              : "Already have an account? Sign In"}
-          </button>
-        </div>
+        {isLogin ? (
+          <div className="flex items-center justify-center w-full gap-2">
+            Don't have an account? <span className="font-bold cursor-pointer" onClick={() => setIsLogin(false)}>Sign Up</span>
+          </div>
+        ): (
+          <div className="flex items-center justify-center w-full gap-2">
+            Already have an account? <span className="font-bold cursor-pointer" onClick={() => setIsLogin(true)}>Sign In</span>
+          </div>
+        )}
       </div>
     </div>
   );
