@@ -1,11 +1,12 @@
 "use client";
 
-import { Menu, Search, ShoppingCart, X } from "lucide-react";
+import { Heart, Menu, Search, ShoppingBag, ShoppingCart, X } from "lucide-react";
 import SearchBar from "./searchBar";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useCheckAuth } from "@/hooks/useAuth";
 
 export default function Navbar() {
   const router = useRouter();
@@ -18,6 +19,8 @@ export default function Navbar() {
       setIsOpen(false)
     }
   };
+
+  const { data: user, isLoading } = useCheckAuth();
   return (
     <nav className="border-b">
       <div className="mx-auto max-w-7xl">
@@ -37,7 +40,12 @@ export default function Navbar() {
                 3
               </span>
             </Button>
-            <Button variant="outline" onClick={() => router.push('/login')}>Login</Button>
+            {user ? (
+              <Button variant="outline" onClick={() => router.push('/profile')}>Profile</Button>
+            ) : (
+              <Button variant="outline" onClick={() => router.push('/login')}>Login</Button>
+            )
+          }
           </div>
           <div className="flex items-center gap-2 md:hidden">
             <Button variant="outline" className="relative" size="icon" onClick={() => router.push('/cart')}>
@@ -75,9 +83,17 @@ export default function Navbar() {
             </Button>
           </form>
           <div className="mt-4">
-            <Button variant="outline" className="w-full" onClick={() => {router.push("/login"); setIsOpen(false)}}>
-              Login
-            </Button>
+            <Button variant="outline" onClick={() => { router.push('/wishlist'); setIsOpen(false); }} className="w-full">Wishlist <Heart /></Button>
+          </div>
+          <div className="mt-4">
+            <Button variant="outline" onClick={() => { router.push('/orders'); setIsOpen(false); }} className="w-full">My Order <ShoppingBag/></Button>
+          </div>
+          <div className="mt-4">
+            {user ? (
+              <Button variant="outline" onClick={() => { router.push('/profile'); setIsOpen(false); }} className="w-full">Profile</Button>
+            ) : (
+              <Button variant="outline" onClick={() => { router.push('/login'); setIsOpen(false); }} className="w-full">Login</Button>
+            )}
           </div>
         </div>
       )}

@@ -1,7 +1,7 @@
 import * as z from "zod";
 
 export const authSchema = z.object({
-    username: z.string().min(3, "Username Must be at least 3 character").optional(),
+    name: z.string().min(3, "Username Must be at least 3 character").optional(),
     email: z.string().email("Enter Proper Mail"),
     password: z
         .string()

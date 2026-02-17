@@ -13,6 +13,10 @@ import { useSignIn, useSignUp } from "@/hooks/useAuth";
 export default function AuthPage() {
   const [ isLogin, setIsLogin ] = useState(true)
   const [ showPassword, setShowPassword ] = useState(false)
+
+  const signIn = useSignIn()
+  const signUp = useSignUp()
+
   const { 
     register, 
     handleSubmit, 
@@ -20,11 +24,17 @@ export default function AuthPage() {
   } = useForm({
     resolver: zodResolver(authSchema), 
   });
+  
   const onSubmit = (formData: any) => {
     const user = {...formData}
-    const { data, isLoading, error } = isLogin ? useSignIn(user) : useSignUp(user)
     console.log(user)
+    if(isLogin){
+      signIn.mutate(user)
+    } else {
+      signUp.mutate(user)
+    }
   }
+  
   return (
     <div className="flex flex-col min-h-[80vh] items-center justify-center px-4 py-12">
       <div className="w-full max-w-100 space-y-8">
@@ -41,10 +51,10 @@ export default function AuthPage() {
                 <Label htmlFor="user">Username</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2" />
-                  <Input placeholder="Username" className="pl-10" required {...register("username")} />
+                  <Input placeholder="Username" className="pl-10" required {...register("name")} />
                 </div>
-                {errors.username && (
-                  <p className="text-xs text-red-500">{errors.username.message as string}</p>
+                {errors.name && (
+                  <p className="text-xs text-red-500">{errors.name.message as string}</p>
                 )}
               </div>
             )}
