@@ -20,5 +20,13 @@ export const productService = {
     deleteProduct: async (id: string) => {
         const data = await axios.delete(`/api/products/${id}`)
         return data;
+    },
+    newArrivals: async () => {
+        const data = await axios.get("/api/products/new")
+        return data;
+    },
+    trending: async () => {
+        const data = await axios.get("/api/products/trending")
+        return data;
     }
 }

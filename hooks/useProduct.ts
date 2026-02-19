@@ -48,3 +48,19 @@ export function useDeleteProduct(id: string){
         }
     })
 }
+
+export function useNewArrivals(){
+    return useQuery({
+        queryKey: ["newArrivals"],
+        queryFn: () => productService.newArrivals(),
+        staleTime: 5 * 60 * 1000,
+    })
+}
+
+export function useTrending(){
+    return useQuery({
+        queryKey: ["trending"],
+        queryFn: () => productService.trending(),
+        staleTime: 5 * 60 * 1000,
+    })
+}

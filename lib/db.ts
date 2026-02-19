@@ -38,9 +38,3 @@ export const connectToDB = async () => {
 
     return cached.connection;
 }
-
-// const connect = async () => {
-//     mongoose.connect(MONGODBURL)
-//         .then(() => console.log("Database Connected"))
-//         .catch(() => console.error("Error in connecting Database"))
-// }
