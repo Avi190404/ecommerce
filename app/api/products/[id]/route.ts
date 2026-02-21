@@ -34,7 +34,7 @@ export async function GET(req:NextRequest, {params}: { params : {id: string}}) {
 
 export async function PATCH(req:NextRequest, {params}: { params : {id: string}}) {
     try{
-        const { id } = params;
+        const { id } = await params;
         const body = await req.json()
         const result = updateProductSchema.safeParse(body)
         if(!result.success){
@@ -54,8 +54,6 @@ export async function PATCH(req:NextRequest, {params}: { params : {id: string}})
         }).catch((err: any) => console.error("ES Update Failed:", err))
 
         await redisClient.del(`Product_${id}`);
-        await redisClient.del("all_products_list");
-
         return NextResponse.json({ msg: "Product Updated Successfully", updateProduct });
     }catch(err){
         console.log(err)
@@ -65,7 +63,7 @@ export async function PATCH(req:NextRequest, {params}: { params : {id: string}})
 
 export async function DELETE(req:NextRequest, {params}: { params : {id: string}}) {
     try{
-        const { id } = params;
+        const { id } = await params;
 
         await connectToDB()
         const deleteProduct = await PRODUCT.findByIdAndDelete(id).lean()
@@ -79,9 +77,7 @@ export async function DELETE(req:NextRequest, {params}: { params : {id: string}}
         }).catch((err: any) => console.error("ES Delete Failed:", err));
 
         await redisClient.del(`Product_${id}`);
-        await redisClient.del("all_products_list");
-
-        return NextResponse.json({ msg: "Product Updated Successfully", deleteProduct });
+        return NextResponse.json({ msg: "Product Deleted Successfully", deleteProduct });
     }catch(err){
         console.log(err)
         return NextResponse.json({Msg: "Internal Server Error"}, {status: 500})
