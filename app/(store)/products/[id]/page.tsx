@@ -8,14 +8,17 @@ import { useState } from "react";
 import { ShoppingCart, Star } from "lucide-react"; 
 import { Button } from "@/components/ui/button";
 import { useAddToCart } from "@/hooks/useCart";
+import { CartErrorAlert } from "@/components/alert";
 
 export default function ProductPage() {
   const params = useParams();
   const { id } = params;
 
-  const { data: product, isLoading, error } = useProductById(id as string);
+  const { data: product, isLoading, error: queryError } = useProductById(id as string);
   const { mutate: addToCart, isPending } = useAddToCart();
+  
   const [image, setImage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   if (isLoading) return (
     <div className="flex min-h-screen items-center justify-center">
@@ -25,7 +28,7 @@ export default function ProductPage() {
     </div>
   );
   
-  if (error || !product?.data) return (
+  if (queryError || !product?.data) return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="p-10 text-center bg-white rounded-2xl border shadow-sm">
         <h2 className="text-xl font-bold text-slate-900">Product not found</h2>
@@ -43,8 +46,9 @@ export default function ProductPage() {
         onSuccess: (response) => {
           console.log("Product added to cart successfully!", response);
         },
-        onError: (err) => {
-          console.error("Failed to add product to cart:", err);
+        onError: (err: any) => {
+          const msg = err.response?.data?.msg || "Failed to add product to cart";
+          setErrorMessage(msg);
         },
       }
     );
@@ -94,7 +98,7 @@ export default function ProductPage() {
               </div>
 
               <div className="space-y-1">
-                <h1 className="text-3xl font-black tracking-tight text-slate-900 md:text-4xl lg:text-5xl uppercase leading-none">
+                <h1 className="text-3xl font-black tracking-tight text-slate-900 md:text-4xl lg:text-5xl uppercase leading-none italic">
                   {product.data.name}
                 </h1>
                 <div className="flex items-center gap-1 text-orange-500">
@@ -111,7 +115,7 @@ export default function ProductPage() {
               </div>
 
               <div className="border-t border-slate-100 pt-6">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Product Description</h3>
+                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 italic">Product Description</h3>
                 <p className="text-base leading-relaxed text-slate-600">
                   {product.data.description}
                 </p>
@@ -123,7 +127,7 @@ export default function ProductPage() {
                 size="lg" 
                 onClick={handleAddToCart}
                 disabled={isPending || product.data.stock === 0}
-                className="h-14 flex-1 rounded-2xl text-lg font-bold shadow-xl shadow-slate-200 transition-all active:scale-95 disabled:opacity-50"
+                className="h-14 flex-1 rounded-2xl text-lg font-bold shadow-xl shadow-slate-200 transition-all active:scale-95 disabled:opacity-50 uppercase tracking-tighter italic"
               >
                 <ShoppingCart className="mr-2 h-5 w-5" />
                 {isPending ? "Adding to Bag..." : "Add to Cart"}
@@ -137,6 +141,11 @@ export default function ProductPage() {
           </div>
         </div>
       </div>
+
+      <CartErrorAlert 
+        errorMessage={errorMessage} 
+        onClose={() => setErrorMessage(null)} 
+      />
     </div>
   );
 }

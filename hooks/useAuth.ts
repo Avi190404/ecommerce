@@ -18,8 +18,9 @@ export function useSignUp() {
     const router = useRouter()
     return useMutation({
         mutationFn: (user: { name: string, email: string, password: string }) => authService.register(user),
-        onSuccess: (data) => {
+        onSuccess: async (data) => {
             queryClient.setQueryData(['user'], data.User);
+            await queryClient.invalidateQueries({ queryKey: ['user'] }); 
             router.push("/")
         }
     })
@@ -30,8 +31,9 @@ export function useSignIn(){
     const router = useRouter()
     return useMutation({
         mutationFn: (user: { email: string, password: string }) => authService.logIn(user),
-        onSuccess: (data) => {
+        onSuccess: async (data) => {
             queryClient.setQueryData(['user'], data.User);
+            await queryClient.invalidateQueries({ queryKey: ['user'] }); 
             router.push("/")
         }
     })
@@ -39,10 +41,15 @@ export function useSignIn(){
 
 export function useLogOut(){
     const queryClient = useQueryClient()
+    const router = useRouter()
+    
     return useMutation({
         mutationFn: () => authService.logOut(),
         onSuccess: () => {
-            queryClient.setQueryData(['user'], null);
+            queryClient.setQueryData(['user'], null); 
+            queryClient.removeQueries({ queryKey: ['user'] }); 
+            queryClient.clear(); 
+            router.push("/login") 
         }
     })
 }

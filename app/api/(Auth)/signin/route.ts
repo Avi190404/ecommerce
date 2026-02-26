@@ -16,14 +16,14 @@ export async function POST(req:NextRequest) {
 
         await connectToDB();
 
-        const user = await USER.findOne({ email })
+        const user = await USER.findOne({ email }).select("+password");
         if(!user){
-            return NextResponse.json({Msg: "Invalid email or password"}, {status: 400})
+            return NextResponse.json({Msg: "User Not Exsist! please SignUp"}, {status: 400})
         }
 
         const isPasswordCorrect = await bcrypt.compare(password, user.password)
         if(!isPasswordCorrect){
-            return NextResponse.json({ Msg: "Invalid email or password"}, {status: 400})
+            return NextResponse.json({ Msg: "Invalid email or password"}, {status: 401})
         }
 
         const userObject = user.toObject();

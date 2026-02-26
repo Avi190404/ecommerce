@@ -2,141 +2,156 @@
 
 import { useRouter } from "next/navigation";
 import { 
-  User, 
-  Mail, 
   Package, 
   Heart, 
   Settings, 
   LogOut, 
   ChevronRight,
   ShieldCheck,
-  CreditCard,
-  MapPin
+  ArrowUpRight,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-// --- MOCK TEST DATA ---
-const MOCK_USER = {
-  name: "Avi Patel",
-  email: "avi19042004@gmail.com",
-  joined: "December 2025",
-  totalOrders: 12,
-  wishlistCount: 5,
-  membership: "Premium"
-};
+import { useCheckAuth, useLogOut } from "@/hooks/useAuth";
+import { useEffect } from "react";
 
 export default function ProfilePage() {
   const router = useRouter();
+  const { data: authResponse, isLoading } = useCheckAuth();
+  const { mutate: logOut, isPending: isLoggingOut } = useLogOut()
+  const user = authResponse?.data?.User;
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push("/login");
+    }
+  }, [user, isLoading, router]);
 
   const menuItems = [
-    { icon: <Package size={18} />, label: "My Orders", href: "/profile/orders", sub: "View your purchase history" },
-    { icon: <Heart size={18} />, label: "Wishlist", href: "/wishlist", sub: "Items you've saved for later" },
-    { icon: <MapPin size={18} />, label: "Addresses", href: "/profile/address", sub: "Manage delivery locations" },
-    { icon: <CreditCard size={18} />, label: "Payment Methods", href: "/profile/payment", sub: "Saved cards and UPI" },
-    { icon: <Settings size={18} />, label: "Settings", href: "/profile/settings", sub: "Privacy and notifications" },
+    { icon: <Package size={20} />, label: "MY ORDERS", href: "/profile/orders", sub: "Track & manage shipments" },
+    { icon: <Heart size={20} />, label: "WISHLIST", href: "/wishlist", sub: "Your curated selection" },
+    { icon: <Settings size={20} />, label: "SETTINGS", href: "/profile/settings", sub: "Security & preferences" },
   ];
 
+  const handleLogOut = () => {
+    logOut(undefined, {
+      onSuccess: () => {
+        console.log("Session terminated successfully");
+      }
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="mx-auto max-w-6xl px-4 py-16 animate-pulse sm:px-6 lg:px-8">
+        <div className="h-64 w-full rounded-[3rem] bg-slate-100" />
+        <div className="mt-16 grid grid-cols-1 gap-16 lg:grid-cols-3">
+          <div className="space-y-4">
+             {[1,2,3,4].map(i => <div key={i} className="h-16 w-full rounded-2xl bg-slate-50" />)}
+          </div>
+          <div className="lg:col-span-2 grid grid-cols-2 gap-6">
+             <div className="h-48 rounded-[2.5rem] bg-slate-50" />
+             <div className="h-48 rounded-[2.5rem] bg-slate-50" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) return null;
+
   return (
-    <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
-      {/* Top Profile Card */}
-      <div className="relative overflow-hidden rounded-[2.5rem] bg-slate-900 p-8 text-white md:p-12">
-        <div className="relative z-10 flex flex-col items-center gap-8 md:flex-row md:justify-between">
-          <div className="flex flex-col items-center gap-6 md:flex-row">
-            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-white text-3xl font-black text-black">
-              {MOCK_USER.name.charAt(0)}
+    <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8 bg-white">
+      <div className="relative overflow-hidden rounded-[3rem] bg-black p-10 text-white md:p-16 shadow-2xl">
+        <div className="relative z-10 flex flex-col items-center gap-10 md:flex-row md:justify-between">
+          <div className="flex flex-col items-center gap-8 md:flex-row">
+            <div className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-white/10 bg-white text-4xl font-black text-black shadow-xl">
+              {user.name?.charAt(0).toUpperCase()}
             </div>
+            
             <div className="text-center md:text-left">
-              <div className="flex items-center justify-center gap-2 md:justify-start">
-                <h1 className="text-4xl font-black uppercase tracking-tighter italic">
-                  {MOCK_USER.name}
+              <div className="flex items-center justify-center gap-3 md:justify-start">
+                <h1 className="text-5xl font-black uppercase tracking-tighter italic leading-none">
+                  {user.name}
                 </h1>
-                <ShieldCheck className="text-blue-400" size={24} />
+                <ShieldCheck className="text-white opacity-40" size={28} />
               </div>
-              <p className="mt-1 text-slate-400 font-medium">{MOCK_USER.email}</p>
-              <div className="mt-3 inline-block rounded-full bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white backdrop-blur-sm">
-                Member since {MOCK_USER.joined}
+              <p className="mt-2 text-slate-400 font-bold uppercase tracking-widest text-xs">
+                {user.email}
+              </p>
+              <div className="mt-5 inline-block rounded-full border border-white/20 bg-white/5 px-4 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-white backdrop-blur-md">
+                AUTHENTICATED AS {user.role?.toUpperCase()}
               </div>
             </div>
           </div>
           
-          <Button variant="outline" className="border-white/20 bg-transparent font-bold text-white hover:bg-white hover:text-black transition-all">
-            Edit Profile
+          <Button variant="outline" className="h-14 rounded-2xl border-white/20 bg-transparent px-8 font-black uppercase tracking-tighter text-white hover:bg-white hover:text-black transition-all active:scale-95">
+            EDIT ACCOUNT
           </Button>
         </div>
-        
-        {/* Decorative background element */}
-        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-blue-500/10 blur-3xl"></div>
+        <div className="absolute -bottom-24 -right-24 h-64 w-64 rounded-full bg-white/5 blur-[100px]"></div>
       </div>
 
-      <div className="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-3">
-        {/* Navigation Sidebar */}
-        <div className="space-y-1">
-          <h3 className="mb-6 px-4 text-xs font-black uppercase tracking-widest text-slate-400">Account Overview</h3>
+      <div className="mt-16 grid grid-cols-1 gap-16 lg:grid-cols-3">
+        <div className="space-y-2">
+          <h3 className="mb-8 px-4 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Control Center</h3>
           {menuItems.map((item) => (
             <button
               key={item.label}
               onClick={() => router.push(item.href)}
-              className="flex w-full items-center justify-between rounded-2xl p-4 text-left transition-all hover:bg-slate-50 group"
+              className="flex w-full items-center justify-between rounded-3xl p-5 text-left transition-all hover:bg-slate-50 group border border-transparent hover:border-slate-100"
             >
-              <div className="flex items-center gap-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-400 group-hover:bg-black group-hover:text-white transition-colors">
+              <div className="flex items-center gap-5">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 text-black group-hover:bg-black group-hover:text-white transition-all duration-300">
                   {item.icon}
                 </div>
                 <div>
-                  <span className="block text-sm font-bold text-slate-900">{item.label}</span>
-                  <span className="text-xs text-slate-400">{item.sub}</span>
+                  <span className="block text-sm font-black uppercase tracking-tight text-slate-900 leading-none">{item.label}</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 block">{item.sub}</span>
                 </div>
               </div>
-              <ChevronRight size={16} className="text-slate-300 group-hover:text-black group-hover:translate-x-1 transition-all" />
+              <ChevronRight size={18} className="text-slate-200 group-hover:text-black group-hover:translate-x-1 transition-all" />
             </button>
           ))}
           
-          <div className="pt-6">
-            <button className="flex w-full items-center gap-4 rounded-2xl p-4 text-left text-red-500 hover:bg-red-50 transition-colors">
-              <LogOut size={18} />
-              <span className="text-sm font-bold uppercase tracking-widest">Sign Out</span>
+          <div className="pt-8 mt-4 border-t border-slate-100">
+            <button 
+              onClick={handleLogOut}
+              disabled={isLoggingOut}
+              className="flex w-full items-center gap-5 rounded-3xl p-5 text-left text-red-500 hover:bg-red-50 transition-all active:scale-95 group disabled:opacity-50"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-red-500 group-hover:bg-red-500 group-hover:text-white transition-all">
+                {isLoggingOut ? <Loader2 className="animate-spin" size={20} /> : <LogOut size={20} />}
+              </div>
+              <span className="text-xs font-black uppercase tracking-[0.2em]">Terminate Session</span>
             </button>
           </div>
         </div>
 
-        {/* Statistics and Quick Info */}
+        {/* STATISTICS */}
         <div className="lg:col-span-2">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="rounded-3xl border border-slate-100 p-8">
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Orders Placed</p>
-              <div className="mt-4 flex items-end justify-between">
-                <h2 className="text-5xl font-black tracking-tighter">{MOCK_USER.totalOrders}</h2>
-                <Package size={32} className="text-slate-100" />
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            
+            <div className="group rounded-[2.5rem] border-2 border-slate-100 p-10 transition-all hover:border-black">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Completed Orders</p>
+              <div className="mt-6 flex items-end justify-between">
+                <h2 className="text-7xl font-black tracking-tighter leading-none">0</h2>
+                <Package size={40} className="text-slate-100 group-hover:text-black transition-colors" />
               </div>
-              <Button variant="link" className="mt-4 h-auto p-0 font-bold text-black underline underline-offset-4">
-                View History
-              </Button>
+              <button className="mt-8 flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-black hover:gap-3 transition-all">
+                ACCESS HISTORY <ArrowUpRight size={14} />
+              </button>
             </div>
 
-            <div className="rounded-3xl border border-slate-100 p-8">
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Saved to Wishlist</p>
-              <div className="mt-4 flex items-end justify-between">
-                <h2 className="text-5xl font-black tracking-tighter">{MOCK_USER.wishlistCount}</h2>
-                <Heart size={32} className="text-slate-100" />
+            <div className="group rounded-[2.5rem] border-2 border-slate-100 p-10 transition-all hover:border-black">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Saved Items</p>
+              <div className="mt-6 flex items-end justify-between">
+                <h2 className="text-7xl font-black tracking-tighter leading-none">0</h2>
+                <Heart size={40} className="text-slate-100 group-hover:text-red-500 transition-colors" />
               </div>
-              <Button variant="link" className="mt-4 h-auto p-0 font-bold text-black underline underline-offset-4">
-                Manage Likes
-              </Button>
-            </div>
-
-            <div className="sm:col-span-2 overflow-hidden rounded-3xl bg-blue-600 p-8 text-white">
-              <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-                <div>
-                  <h3 className="text-2xl font-black uppercase tracking-tighter">Premium Benefits</h3>
-                  <p className="mt-2 text-sm text-blue-100">
-                    You're currently a <span className="font-bold text-white">VIP Member</span>. 
-                    Enjoy free express shipping on all orders.
-                  </p>
-                </div>
-                <div className="h-20 w-20 flex-shrink-0 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center">
-                   <ShieldCheck size={40} />
-                </div>
-              </div>
+              <button className="mt-8 flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-black hover:gap-3 transition-all">
+                MANAGE CURATION <ArrowUpRight size={14} />
+              </button>
             </div>
           </div>
         </div>

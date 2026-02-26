@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react"; 
 import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, Trash2, ArrowRight, ShoppingBag, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart, useUpdateCart } from "@/hooks/useCart";
+import { CartErrorAlert } from "@/components/alert";
 
 function CartSkeleton() {
   return (
@@ -44,17 +46,36 @@ function CartSkeleton() {
 }
 
 export default function CartPage() {
+  const [alertConfig, setAlertConfig] = useState<{ title: string; message: string } | null>(null);
+
   const { data: cartResponse, isLoading, error } = useCart();
+  
   const { mutate: updateCart, isPending: isUpdating } = useUpdateCart();
   
   const cart = cartResponse?.cart;
 
   const handleQuantityChange = (productId: string, action: "increment" | "decrement") => {
-    updateCart({ productId, action });
+    updateCart(
+      { productId, action },
+      {
+        onError: (err: any) => {
+          const msg = err.response?.data?.msg || "Could not update quantity.";
+          setAlertConfig({ title: "Inventory Update", message: msg });
+        },
+      }
+    );
   };
 
   const handleRemove = (productId: string) => {
-    updateCart({ productId, action: "remove" });
+    updateCart(
+      { productId, action: "remove" },
+      {
+        onError: (err: any) => {
+          const msg = err.response?.data?.msg || "Could not remove item.";
+          setAlertConfig({ title: "Cart Error", message: msg });
+        },
+      }
+    );
   };
 
   if (isLoading) return <CartSkeleton />;
@@ -181,6 +202,12 @@ export default function CartPage() {
           </div>
         </div>
       </div>
+
+      <CartErrorAlert 
+        title={alertConfig?.title} 
+        errorMessage={alertConfig?.message || null} 
+        onClose={() => setAlertConfig(null)} 
+      />
     </div>
   );
 }
