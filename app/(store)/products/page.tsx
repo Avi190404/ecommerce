@@ -145,7 +145,7 @@ export default function ProductsPage() {
           <div>Error loading products.</div>
         ) : data.total === 0 ?(
           <div className="font-bold text-slate-500 text-xl flex flex-col gap-2 items-center justify-center w-full h-64 sm:text-2xl md:text-4xl">
-            <PackageSearch className="w-8 h-8 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16" />
+              <PackageSearch className="w-8 h-8 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16" />
             <div>No Product Found</div>
           </div>
         ) : (

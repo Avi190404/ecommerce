@@ -2,10 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { TrendingUp, ChevronRight, ChevronLeft, ShoppingCart, Eye } from "lucide-react";
-import { useRef } from "react";
+import { TrendingUp, ChevronRight, ChevronLeft, ShoppingCart, Eye, Loader2 } from "lucide-react";
+import { useRef, useState } from "react";
 import { Button } from "./ui/button";
 import { useTrending } from "@/hooks/useProduct";
+import { useAddToCart } from "@/hooks/useCart";
+import { CartErrorAlert } from "@/components/alert";
 
 const TrendingSkeleton = () => {
   return (
@@ -43,7 +45,10 @@ const TrendingSkeleton = () => {
 };
 
 export default function TrendingProducts() {
+  const [alertConfig, setAlertConfig] = useState<{ title: string; message: string } | null>(null);
   const { data: trending, isLoading, error } = useTrending();
+  const { mutate: addToCart, isPending } = useAddToCart();
+  
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: "left" | "right") => {
@@ -52,6 +57,18 @@ export default function TrendingProducts() {
       const scrollTo = direction === "left" ? scrollLeft - clientWidth : scrollLeft + clientWidth;
       scrollRef.current.scrollTo({ left: scrollTo, behavior: "smooth" });
     }
+  };
+
+  const handleQuickAdd = (productId: string) => {
+    addToCart(
+      { productId, quantity: 1 },
+      {
+        onError: (err: any) => {
+          const msg = err.response?.data?.msg || "Unable to add product to cart.";
+          setAlertConfig({ title: "Inventory Issue", message: msg });
+        },
+      }
+    );
   };
 
   if (isLoading) return <TrendingSkeleton />;
@@ -77,7 +94,7 @@ export default function TrendingProducts() {
               variant="outline" 
               size="icon" 
               onClick={() => scroll("left")} 
-              className="rounded-full hover:bg-slate-100"
+              className="rounded-full hover:bg-slate-100 cursor-pointer"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -85,7 +102,7 @@ export default function TrendingProducts() {
               variant="outline" 
               size="icon" 
               onClick={() => scroll("right")} 
-              className="rounded-full hover:bg-slate-100"
+              className="rounded-full hover:bg-slate-100 cursor-pointer"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -116,15 +133,17 @@ export default function TrendingProducts() {
                   <Button 
                     size="icon" 
                     variant="secondary" 
-                    className="rounded-full shadow-lg hover:scale-110 transition-transform active:scale-95"
+                    disabled={isPending}
+                    onClick={() => handleQuickAdd(product._id)}
+                    className="rounded-full shadow-lg hover:scale-110 transition-transform active:scale-95 cursor-pointer"
                   >
-                    <ShoppingCart className="h-4 w-4" />
+                    {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShoppingCart className="h-4 w-4" />}
                   </Button>
                   <Link href={`/products/${product._id}`}>
                     <Button 
                       size="icon" 
                       variant="secondary" 
-                      className="rounded-full shadow-lg hover:scale-110 transition-transform active:scale-95"
+                      className="rounded-full shadow-lg hover:scale-110 transition-transform active:scale-95 cursor-pointer"
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
@@ -157,6 +176,12 @@ export default function TrendingProducts() {
           ))}
         </div>
       </div>
+
+      <CartErrorAlert 
+        title={alertConfig?.title} 
+        errorMessage={alertConfig?.message || null} 
+        onClose={() => setAlertConfig(null)} 
+      />
     </section>
   );
 }
